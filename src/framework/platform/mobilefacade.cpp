@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 OTClient <https://github.com/edubart/otclient>
+ * Copyright (c) 2010-2014 OTClient <https://github.com/edubart/otclient>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,33 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-#ifndef FRAMEWORK_GLOBAL_H
-#define FRAMEWORK_GLOBAL_H
-
-#include "stdext/compiler.h"
-
-// common C/C++ headers
-#include "pch.h"
-
-// global constants
-#include "const.h"
-
-// stdext which includes additional C++ algorithms
-#include "stdext/stdext.h"
-
-// additional utilities
-#include "util/point.h"
-#include "util/color.h"
-#include "util/rect.h"
-#include "util/size.h"
-#include "util/matrix.h"
-
-// logger
-#include "core/logger.h"
-
 #ifdef ANDROID
-#include "platform/mobilefacade.h"
-#endif
+
+#include "mobilefacade.h"
+#include "androidwindow.h"
+
+MobileFacade g_mobileFacade;
+
+void MobileFacade::showKeyboardSoft() {
+    ((AndroidWindow&) g_window).showKeyboardSoft();
+}
 
 #endif

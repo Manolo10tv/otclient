@@ -103,7 +103,7 @@ void Application::init(std::vector<std::string>& args)
     registerLuaFunctions();
 }
 
-void Application::deinit()
+void Application::unloadModules()
 {
     g_lua.callGlobalField("g_app", "onTerminate");
 
@@ -179,6 +179,8 @@ std::string Application::getOs()
     return "mac";
 #elif __linux
     return "linux";
+#elif ANDROID
+	return "android";
 #else
     return "unknown";
 #endif

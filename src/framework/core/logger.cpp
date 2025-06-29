@@ -33,6 +33,10 @@
 #include <framework/luaengine/luainterface.h>
 #endif
 
+#ifdef ANDROID
+#include <android/log.h>
+#endif // ANDROID
+
 Logger g_logger;
 
 namespace
@@ -70,6 +74,9 @@ void Logger::log(Fw::LogLevel level, const std::string& message)
         outmsg = tmp.str();
 #endif
     */
+#ifdef ANDROID
+    __android_log_print(ANDROID_LOG_INFO, "OTClientMobile", outmsg.c_str());
+#endif // ANDROID
 
     std::cout << outmsg << std::endl;
 

@@ -659,8 +659,12 @@ void UITextEdit::onFocusChange(bool focused, Fw::FocusReason reason)
         else
             blinkCursor();
         update(true);
+#ifdef ANDROID
+        g_mobileFacade.showKeyboardSoft();
+#endif
     } else if(m_selectable)
         clearSelection();
+
     UIWidget::onFocusChange(focused, reason);
 }
 

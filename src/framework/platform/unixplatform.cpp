@@ -29,7 +29,12 @@
 #include <framework/stdext/stdext.h>
 
 #include <sys/stat.h>
+
+#ifdef ANDROID
+#include <errno.h>
+#else
 #include <execinfo.h>
+#endif
 
 void Platform::processArgs(std::vector<std::string>& args)
 {
@@ -175,6 +180,7 @@ std::string Platform::getOSName()
     return std::string();
 }
 
+#ifndef ANDROID
 std::string Platform::traceback(const std::string& where, int level, int maxDepth)
 {
     std::stringstream ss;
@@ -205,5 +211,13 @@ std::string Platform::traceback(const std::string& where, int level, int maxDept
 
     return ss.str();
 }
+#else
+std::string Platform::traceback(const std::string& where, int level, int maxDepth){
+	std::stringstream ss;
+    ss << "\nat:";
+    ss << "\n\t[C++]: " << where;
+    return ss.str();
+}
+#endif
 
 #endif

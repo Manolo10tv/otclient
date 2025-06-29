@@ -21,68 +21,62 @@
  */
 
 #include "client.h"
-#include <framework/core/modulemanager.h>
-#include <framework/core/resourcemanager.h>
-#include <framework/graphics/graphics.h>
 #include "game.h"
 #include "map.h"
 #include "shadermanager.h"
 #include "spritemanager.h"
 #include "minimap.h"
+#include <framework/luaengine/luainterface.h>
+#include <framework/core/application.h>
+#include <framework/core/modulemanager.h>
+#include <framework/core/resourcemanager.h>
 #include <framework/core/configmanager.h>
+#include <framework/graphics/graphics.h>
 
-Client g_client;
+Client::Client(int argc, char* argv[]) {
+    std::vector<std::string> args(argv, argv + argc);
+    initAppFrameworkAndOTClient(args);
+}
 
-void Client::init(std::vector<std::string>& args)
+void Client::initAppFrameworkAndOTClient(std::vector<std::string>& args)
 {
-    // register needed lua functions
-    registerLuaFunctions();
+    setupAppNameAndVersion();
 
+    g_app.init(args);
     g_map.init();
     g_minimap.init();
     g_game.init();
     g_shaders.init();
     g_things.init();
 
-    //TODO: restore options
-/*
-    if(g_graphics.parseOption(arg))
-        continue;
+    registerLuaFunctions();
+    findLuaInitScript();
 
-    if(arg == "-version" || arg == "--version" || arg == "-v") {
-        stdext::print(
-            m_appName, " ", m_appVersion, "\n"
-            "Buitt on: ", BUILD_DATE, "\n",
-            "Commit: ", BUILD_COMMIT, "\n",
-            "Compiled by: ", BUILD_COMPILER, "\n",
-            "Build type: ", BUILD_TYPE, "\n");
-        return;
-    } else if(arg == "-help" || arg == "--help" || arg == "-h" || arg == "-?" || arg == "/?") {
-        stdext::print(
-            "Usage: ", args[0], " [options]\n"
-            "Options:\n"
-            "  -help                            Display this information and exit\n"
-            "  -version                         Display version and exit\n"
-            "  \n"
-            "  -no-fbos                         Disable usage of opengl framebuffer objects\n"
-            "  -no-mipmaps                      Disable texture mipmaping\n"
-            "  -no-smooth                       Disable texture smoothing (bilinear filter)\n"
-            "  -no-non-power-of-two-textures    Use only power of two textures\n"
-            "  -no-clamp-to-edge                Don't use GL_CLAMP_TO_EDGE\n"
-            "  -no-backbuffer-cache             Don't allow backbuffer caching\n"
-            "  -hardware-buffers                Cache vertex arrays in hardware\n"
-            "  -opengl1                         Use OpenGL 1.x painter\n"
-            "  -opengl2                         Use OpenGL 2.0 painter\n");
-        return;
-    } else {
-        stdext::println("Unrecognized option '", arg, "', please see -help for available options list");
-        return;
-    }
-    */
+    g_app.runAppMainLoop();
 }
 
-void Client::terminate()
+void Client::setupAppNameAndVersion() {
+    g_app.setName("OTClient");
+    g_app.setCompactName("otclient");
+    g_app.setVersion(VERSION);
+}
+
+void Client::findLuaInitScript() {
+    if(!g_resources.discoverWorkDir("init.lua"))
+        g_logger.fatal("Unable to find work directory, the application cannot be initialized.");
+
+    runLuaInitScript();
+}
+
+void Client::runLuaInitScript() {
+    if(!g_lua.safeRunScript("init.lua"))
+        g_logger.fatal("Unable to run script init.lua!");
+}
+
+void Client::terminateAndFreeMemory()
 {
+    g_app.unloadModules();
+
     g_creatures.terminate();
     g_game.terminate();
     g_map.terminate();
@@ -90,4 +84,5 @@ void Client::terminate()
     g_things.terminate();
     g_sprites.terminate();
     g_shaders.terminate();
+    g_app.terminate();
 }
